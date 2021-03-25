@@ -3,9 +3,10 @@ import time
 
 pygame.init()
 
-width = 270
+width = 9*30
 height = width + 230
 cells = {}
+buttons = {}
 
 FPS = 20
 FPSCLOCK = pygame.time.Clock()
@@ -14,7 +15,7 @@ screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption('Sudoko')
 screen.fill(pygame.Color("white"))
 
-BASICFONTSIZE = 25
+BASICFONTSIZE = int(width/14.4)
 BASICFONT = pygame.font.Font('freesansbold.ttf', BASICFONTSIZE)
 
 pygame.display.flip()
@@ -22,6 +23,7 @@ pygame.display.flip()
 def main():
 
     defCells(exampleBoard)
+    defButtons()
 
 
     running = True
@@ -41,6 +43,7 @@ def main():
                     if pos:
                         clicked(pos)
         drawCells()
+        drawButtons()
         drawGrid()
         pygame.display.update()
         FPSCLOCK.tick(FPS)
@@ -48,25 +51,30 @@ def main():
     sys.exit()
 
 
-WINDOWHEIGHT = width
-WINDOWWIDTH = width
+WINDOWHEIGHT = height
+GRIDHEIGHT = width
+GRIDWIDTH = width
 SQUARESIZE = int(width/3)
 CELLSIZE = int(width/9)
 NUMBERSIZE = int(CELLSIZE/3)
 WINDOWSIZE = 81
-
+BUTTONHEIGHT = GRIDWIDTH*(50/270)
+BUTTONWIDTH = GRIDWIDTH*(70/270)
 
 def drawGrid():
-    for x in range(0, WINDOWWIDTH, CELLSIZE):
-        pygame.draw.line(screen, pygame.Color("gray"), (x,0), (x,WINDOWHEIGHT))
-    for y in range(0, WINDOWHEIGHT, CELLSIZE):
-        pygame.draw.line(screen, pygame.Color("gray"), (0,y), (WINDOWWIDTH,y))
+    for x in range(0, GRIDWIDTH, CELLSIZE):
+        pygame.draw.line(screen, pygame.Color("gray"), (x,0), (x,GRIDHEIGHT))
+    for y in range(0, GRIDHEIGHT, CELLSIZE):
+        pygame.draw.line(screen, pygame.Color("gray"), (0,y), (GRIDWIDTH,y))
     
     
-    for x in range(0, WINDOWWIDTH + SQUARESIZE, SQUARESIZE):
-        pygame.draw.line(screen, pygame.Color("black"), (x,0), (x,WINDOWHEIGHT))
-    for y in range(0, WINDOWHEIGHT + SQUARESIZE, SQUARESIZE):
-        pygame.draw.line(screen, pygame.Color("black"), (0,y), (WINDOWWIDTH,y))
+    for x in range(0, GRIDWIDTH + SQUARESIZE, SQUARESIZE):
+        pygame.draw.line(screen, pygame.Color("black"), (x,0), (x,GRIDHEIGHT))
+    for y in range(0, GRIDHEIGHT + SQUARESIZE, SQUARESIZE):
+        pygame.draw.line(screen, pygame.Color("black"), (0,y), (GRIDWIDTH,y))
+
+    
+    
 
 exampleBoard = [[3, 0, 6, 5, 0, 8, 4, 0, 0], 
                 [5, 2, 0, 0, 0, 0, 0, 0, 0], 
@@ -90,15 +98,19 @@ correctBoard = [[3, 1, 6, 5, 7, 8, 4, 9, 2],
 
 
 def defCells(board):
-    for x in range(0, WINDOWWIDTH, CELLSIZE):
-        for y in range(0, WINDOWWIDTH, CELLSIZE):
-            boardNum = board[int(y/CELLSIZE)][int(x/CELLSIZE)]
+    for x in range(0, GRIDWIDTH, CELLSIZE):
+        for y in range(0, GRIDWIDTH, CELLSIZE):
+            boardNum = board[round(y/CELLSIZE)][round(x/CELLSIZE)]
             if  boardNum == 0:
                 cells[x,y] = CellBlock(x, y, CELLSIZE,True, '')
             else:
-                cells[x,y] = CellBlock(x, y, CELLSIZE,False, str(boardNum))
-                
+                cells[x,y] = CellBlock(x, y, CELLSIZE,False, str(boardNum))    
               
+def defButtons():
+    y = 0
+    for x in range(int((GRIDWIDTH/3 - BUTTONWIDTH)/2), GRIDWIDTH, int(GRIDWIDTH/3)):
+        buttons[x,y] = Buttons(x, y)
+
 
 class CellBlock:
     def __init__(self,x, y, CELLSIZE, fluid=True, number=''):
@@ -111,7 +123,7 @@ class CellBlock:
         self.correct = not(self.fluid)
 
     def drawCell(self, screen):
-        options = {0:'white', 1:'gray46', 2:'gray79'}
+        options = {0:'white', 1:'gray68', 2:'gray79'}
         pygame.draw.rect(screen, pygame.Color(options.get(self.highlighted, 'white')), self.rect)
 
     def drawNum(self, number=-1):
@@ -124,44 +136,65 @@ class CellBlock:
                 cellSurf = BASICFONT.render(str(self.number), True, (255, 0, 0))
         else:
             cellSurf = BASICFONT.render(str(self.number), True, (0,0,0))
-        screen.blit(cellSurf, (self.x+10,self.y+5))
+        screen.blit(cellSurf, (self.x+(CELLSIZE/3),self.y+(CELLSIZE/4)))
 
     def setHighlighted(self, highlighted):
         self.highlighted = highlighted
 
+class Buttons:
+    def __init__(self, x, y):
+        self.name = "button"
+        self.x = x
+        self.y = y
+        self.rect = pygame.Rect(self.x, int(WINDOWHEIGHT*0.70), BUTTONWIDTH, BUTTONHEIGHT)
 
+    def drawbutton(self, screen):
+        pygame.draw.rect(screen, pygame.Color('green'), self.rect)
 
 def drawCells():
-    for x in range(0, WINDOWWIDTH, CELLSIZE):
-        for y in range(0, WINDOWWIDTH, CELLSIZE):
+    for x in range(0, GRIDWIDTH, CELLSIZE):
+        for y in range(0, GRIDWIDTH, CELLSIZE):
             cells[x,y].drawCell(screen)
             cells[x,y].drawNum()
             
-
+def drawButtons():
+    y = 0
+    for x in range(int((GRIDWIDTH/3 - BUTTONWIDTH)/2), GRIDWIDTH, int(GRIDWIDTH/3)):
+        buttons[x,y].drawbutton(screen)
 
 def clicked(pos):
-    for x in range(0, WINDOWWIDTH, CELLSIZE):
-        for y in range(0, WINDOWWIDTH, CELLSIZE):
+    for x in range(0, GRIDWIDTH, CELLSIZE):
+        for y in range(0, GRIDWIDTH, CELLSIZE):
             if cells[x,y].rect.collidepoint(pos):
                 cells[x,y].setHighlighted(1)
                 num = cells[x,y].number
-                print(num)
             else:
                 cells[x,y].setHighlighted(0)
+                num = None
     
-    for x in range(0, WINDOWWIDTH, CELLSIZE):
-        for y in range(0, WINDOWWIDTH, CELLSIZE):
+    for x in range(0, GRIDWIDTH, CELLSIZE):
+        for y in range(0, GRIDWIDTH, CELLSIZE):
             if cells[x,y].number == num and not cells[x,y].highlighted and num != '':
                 cells[x,y].setHighlighted(2)
 
+    for x in range(int((GRIDWIDTH/3 - BUTTONWIDTH)/2), GRIDWIDTH, int(GRIDWIDTH/3)):
+        y = 0
+        if buttons[x,y].rect.collidepoint(pos):
+            print("clicked")
+            if x == 10:
+                solveBoard()
+
+
+
 
 def changeNum(n):
-    for x in range(0, WINDOWWIDTH, CELLSIZE):
-        for y in range(0, WINDOWWIDTH, CELLSIZE):
+    for x in range(0, GRIDWIDTH, CELLSIZE):
+        for y in range(0, GRIDWIDTH, CELLSIZE):
             if cells[x,y].highlighted == 1:
                 cells[x,y].drawNum(n)
                 inputCheck(x, y, n)
-                  
+
+
 def inputCheck(x, y, n):
     if correctBoard[int(y/CELLSIZE)][int(x/CELLSIZE)] == n:
         cells[x,y].correct = True
@@ -169,5 +202,8 @@ def inputCheck(x, y, n):
     else:
         print('incorrect')
 
+
+def solveBoard():
+    print("Will now solve board")
 
 main()
