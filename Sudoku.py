@@ -60,6 +60,7 @@ NUMBERSIZE = int(CELLSIZE/3)
 WINDOWSIZE = 81
 BUTTONHEIGHT = GRIDWIDTH*(50/270)
 BUTTONWIDTH = GRIDWIDTH*(70/270)
+NUMOFCELLS = int(GRIDWIDTH/CELLSIZE)
 
 def drawGrid():
     for x in range(0, GRIDWIDTH, CELLSIZE):
@@ -98,9 +99,9 @@ correctBoard = [[3, 1, 6, 5, 7, 8, 4, 9, 2],
 
 
 def defCells(board):
-    for x in range(0, GRIDWIDTH, CELLSIZE):
-        for y in range(0, GRIDWIDTH, CELLSIZE):
-            boardNum = board[round(y/CELLSIZE)][round(x/CELLSIZE)]
+    for x in range(NUMOFCELLS):
+        for y in range(NUMOFCELLS):
+            boardNum = board[round(y)][round(x)]
             if  boardNum == 0:
                 cells[x,y] = CellBlock(x, y, CELLSIZE,True, '')
             else:
@@ -116,24 +117,24 @@ class CellBlock:
     def __init__(self,x, y, CELLSIZE, fluid=True, number=''):
         self.number = number
         self.fluid = fluid
-        self.rect = pygame.Rect(x, y, CELLSIZE, CELLSIZE)
-        self.x = x
-        self.y = y
+        self.x = x*CELLSIZE
+        self.y = y*CELLSIZE
+        self.rect = pygame.Rect(self.x, self.y, CELLSIZE, CELLSIZE)
         self.highlighted = 0
-        self.correct = not(self.fluid)
+        self.correct = False
 
     def drawCell(self, screen):
         options = {0:'white', 1:'gray68', 2:'gray79'}
         pygame.draw.rect(screen, pygame.Color(options.get(self.highlighted, 'white')), self.rect)
 
     def drawNum(self, number=-1):
-        if number > 0 and self.fluid == True:
+        if number > 0:
             self.number = str(number)
-        if self.fluid:
-            if self.correct:
+        if self.correct:
                 cellSurf = BASICFONT.render(str(self.number), True, (153,50,204))
-            else:
-                cellSurf = BASICFONT.render(str(self.number), True, (255, 0, 0))
+                self.fluid = False
+        elif self.fluid:
+            cellSurf = BASICFONT.render(str(self.number), True, (255, 0, 0))
         else:
             cellSurf = BASICFONT.render(str(self.number), True, (0,0,0))
         screen.blit(cellSurf, (self.x+(CELLSIZE/3),self.y+(CELLSIZE/4)))
@@ -151,9 +152,10 @@ class Buttons:
     def drawbutton(self, screen):
         pygame.draw.rect(screen, pygame.Color('green'), self.rect)
 
+
 def drawCells():
-    for x in range(0, GRIDWIDTH, CELLSIZE):
-        for y in range(0, GRIDWIDTH, CELLSIZE):
+    for x in range(NUMOFCELLS):
+        for y in range(NUMOFCELLS):
             cells[x,y].drawCell(screen)
             cells[x,y].drawNum()
             
@@ -163,17 +165,16 @@ def drawButtons():
         buttons[x,y].drawbutton(screen)
 
 def clicked(pos):
-    for x in range(0, GRIDWIDTH, CELLSIZE):
-        for y in range(0, GRIDWIDTH, CELLSIZE):
+    for x in range(NUMOFCELLS):
+        for y in range(NUMOFCELLS):
             if cells[x,y].rect.collidepoint(pos):
                 cells[x,y].setHighlighted(1)
                 num = cells[x,y].number
             else:
                 cells[x,y].setHighlighted(0)
-                num = None
     
-    for x in range(0, GRIDWIDTH, CELLSIZE):
-        for y in range(0, GRIDWIDTH, CELLSIZE):
+    for x in range(NUMOFCELLS):
+        for y in range(NUMOFCELLS):
             if cells[x,y].number == num and not cells[x,y].highlighted and num != '':
                 cells[x,y].setHighlighted(2)
 
@@ -188,15 +189,15 @@ def clicked(pos):
 
 
 def changeNum(n):
-    for x in range(0, GRIDWIDTH, CELLSIZE):
-        for y in range(0, GRIDWIDTH, CELLSIZE):
-            if cells[x,y].highlighted == 1:
+    for x in range(NUMOFCELLS):
+        for y in range(NUMOFCELLS):
+            if cells[x,y].highlighted == 1 and cells[x,y].fluid:
                 cells[x,y].drawNum(n)
                 inputCheck(x, y, n)
 
 
 def inputCheck(x, y, n):
-    if correctBoard[int(y/CELLSIZE)][int(x/CELLSIZE)] == n:
+    if correctBoard[int(y)][int(x)] == n:
         cells[x,y].correct = True
         print('correct')
     else:
