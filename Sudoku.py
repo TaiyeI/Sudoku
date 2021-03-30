@@ -165,25 +165,26 @@ def drawButtons():
         buttons[x,y].drawbutton(screen)
 
 def clicked(pos):
-    for x in range(NUMOFCELLS):
-        for y in range(NUMOFCELLS):
-            if cells[x,y].rect.collidepoint(pos):
-                cells[x,y].setHighlighted(1)
-                num = cells[x,y].number
-            else:
-                cells[x,y].setHighlighted(0)
-    
-    for x in range(NUMOFCELLS):
-        for y in range(NUMOFCELLS):
-            if cells[x,y].number == num and not cells[x,y].highlighted and num != '':
-                cells[x,y].setHighlighted(2)
+    if pos[1]>0 and pos[1]<GRIDHEIGHT:
+        for x in range(NUMOFCELLS):
+            for y in range(NUMOFCELLS):
+                if cells[x,y].rect.collidepoint(pos):
+                    cells[x,y].setHighlighted(1)
+                    num = cells[x,y].number
+                else:
+                    cells[x,y].setHighlighted(0)
+        
+        for x in range(NUMOFCELLS):
+            for y in range(NUMOFCELLS):
+                if cells[x,y].number == num and not cells[x,y].highlighted and num != '':
+                    cells[x,y].setHighlighted(2)
 
     for x in range(int((GRIDWIDTH/3 - BUTTONWIDTH)/2), GRIDWIDTH, int(GRIDWIDTH/3)):
         y = 0
         if buttons[x,y].rect.collidepoint(pos):
             print("clicked")
             if x == 10:
-                solveBoard()
+                solveBoard(exampleBoard)
 
 
 
@@ -203,8 +204,35 @@ def inputCheck(x, y, n):
     else:
         print('incorrect')
 
+def solveBoard(board):
+    for x in range(NUMOFCELLS):
+        for y in range(NUMOFCELLS):
+            if cells[x,y].fluid:
+                inputCheck(x,y,3)
+                cells[x,y].drawNum(3)
 
-def solveBoard():
-    print("Will now solve board")
+
+'''def solveBoard(board):
+    (x,y) = findSpaces(board)
+    cells[x,y].number = 1
+    pos = (x*30 - 1, y*30 - 1)
+    clicked(pos)
+    cells[x,y].drawnum(1)
+    
+    
+def findSpaces(board):
+    for x in range(NUMOFCELLS):
+        for y in range(NUMOFCELLS):
+            if cells[x,y].fluid:
+                return (x,y)
+    return None
+
+def attemptFill():
+    x = 1
+    fill = findSpaces(exampleBoard)
+    fill.drawnum(x)
+'''
+
+
 
 main()
