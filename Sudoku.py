@@ -185,6 +185,11 @@ def clicked(pos):
             print("clicked")
             if x == 10:
                 solveBoard(exampleBoard)
+                if solveBoard:
+                    for x in range(NUMOFCELLS):
+                        for y in range(NUMOFCELLS):
+                            inputCheck(x, y, int(cells[x,y].number))
+
 
 
 
@@ -205,33 +210,57 @@ def inputCheck(x, y, n):
         print('incorrect')
 
 def solveBoard(board):
-    for x in range(NUMOFCELLS):
-        for y in range(NUMOFCELLS):
-            if cells[x,y].fluid:
-                inputCheck(x,y,3)
-                cells[x,y].drawNum(3)
+    find = findSpaces(board)
+    if not find:
+        return True
+    else:
+        x,y = find
+
+    for i in range(1,10):
+        if valid(board, i, x, y):
+            cells[x,y].drawNum(i)
+
+            if solveBoard(board):
+                return True
+            
+            cells[x,y].number = ''
+            cells[x,y].drawNum()
+    
+        
+    
+    return False
 
 
-'''def solveBoard(board):
-    (x,y) = findSpaces(board)
-    cells[x,y].number = 1
-    pos = (x*30 - 1, y*30 - 1)
-    clicked(pos)
-    cells[x,y].drawnum(1)
-    
-    
+
 def findSpaces(board):
     for x in range(NUMOFCELLS):
         for y in range(NUMOFCELLS):
-            if cells[x,y].fluid:
+            if cells[x,y].number == '':
                 return (x,y)
     return None
 
-def attemptFill():
-    x = 1
-    fill = findSpaces(exampleBoard)
-    fill.drawnum(x)
-'''
+def valid(board, num, x, y):
+
+    for i in range(9):
+        if cells[x,i].number == str(num) and y != i:
+            print("invalid")
+            return False
+
+    for i in range(9):
+        if cells[i,y].number == str(num) and x != i:
+            print("invalid")
+            return False
+
+    box_x = x // 3
+    box_y = y // 3
+
+    for i in range(box_x*3, box_x*3 + 3):
+        for j in range(box_y*3, box_y*3 + 3):
+            if cells[i,j].number == str(num) and (i,j) != (x,y):
+                return False
+
+
+    return True
 
 
 
