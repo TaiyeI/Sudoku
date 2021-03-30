@@ -223,6 +223,7 @@ def solveBoard(board):
             if solveBoard(board):
                 return True
             
+            #This may need to be else:
             cells[x,y].number = ''
             cells[x,y].drawNum()
     
