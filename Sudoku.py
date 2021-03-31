@@ -3,11 +3,13 @@ import time
 
 pygame.init()
 
+#Defining Window Dimensions
 width = 9*30
 height = width + 230
+#Creating Arrays to hold instances of classes
 cells = {}
 buttons = {}
-
+#Setting global variables for refresh, screen,display and font
 FPS = 20
 FPSCLOCK = pygame.time.Clock()
 
@@ -20,8 +22,10 @@ BASICFONT = pygame.font.Font('freesansbold.ttf', BASICFONTSIZE)
 
 pygame.display.flip()
 
+
 def main():
 
+    #Define Cells and Buttons
     defCells(exampleBoard)
     defButtons()
 
@@ -31,17 +35,21 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+                #Quit Game if exit button clicked
             if event.type == pygame.MOUSEBUTTONDOWN:
+                #Checking for mouseclicks
                 if event.button == 1:
                     pos = pygame.mouse.get_pos()
                     clicked(pos)
             if event.type == pygame.KEYDOWN:
+                #Checking for number input
                 numbers = [pygame.K_0, pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5, pygame.K_6, pygame.K_7, pygame.K_8, pygame.K_9]
                 if event.key in numbers:
                     x = numbers.index(event.key)
                     changeNum(x)
                     if pos:
                         clicked(pos)
+        #Drawing game features
         drawCells()
         drawButtons()
         drawGrid()
@@ -50,7 +58,7 @@ def main():
     pygame.quit()
     sys.exit()
 
-
+#Defining static dependable variables to allow for window size scalability
 WINDOWHEIGHT = height
 GRIDHEIGHT = width
 GRIDWIDTH = width
@@ -98,6 +106,7 @@ correctBoard = [[3, 1, 6, 5, 7, 8, 4, 9, 2],
                 [7, 4, 5, 2, 8, 6, 3, 1, 9]]
 
 
+#Creates intances of class CellBlock
 def defCells(board):
     for x in range(NUMOFCELLS):
         for y in range(NUMOFCELLS):
@@ -106,7 +115,8 @@ def defCells(board):
                 cells[x,y] = CellBlock(x, y, CELLSIZE,True, '')
             else:
                 cells[x,y] = CellBlock(x, y, CELLSIZE,False, str(boardNum))    
-              
+
+#Creates intances of class Buttons     
 def defButtons():
     y = 0
     for x in range(int((GRIDWIDTH/3 - BUTTONWIDTH)/2), GRIDWIDTH, int(GRIDWIDTH/3)):
@@ -123,10 +133,13 @@ class CellBlock:
         self.highlighted = 0
         self.correct = False
 
+    #Colours the cell block depending on options
     def drawCell(self, screen):
         options = {0:'white', 1:'gray68', 2:'gray79'}
         pygame.draw.rect(screen, pygame.Color(options.get(self.highlighted, 'white')), self.rect)
-
+    
+    #Changes the displayed number and value of the number in a Cell
+    #Changes Colour of Cell
     def drawNum(self, number=-1):
         if number > 0:
             self.number = str(number)
@@ -148,23 +161,27 @@ class Buttons:
         self.x = x
         self.y = y
         self.rect = pygame.Rect(self.x, int(WINDOWHEIGHT*0.70), BUTTONWIDTH, BUTTONHEIGHT)
-
+   
+    #Draw the visual button
     def drawbutton(self, screen):
         pygame.draw.rect(screen, pygame.Color('green'), self.rect)
 
-
+#Drwa all cells and numbers
 def drawCells():
     for x in range(NUMOFCELLS):
         for y in range(NUMOFCELLS):
             cells[x,y].drawCell(screen)
             cells[x,y].drawNum()
-            
+
+#Draws 3 spaced button            
 def drawButtons():
     y = 0
     for x in range(int((GRIDWIDTH/3 - BUTTONWIDTH)/2), GRIDWIDTH, int(GRIDWIDTH/3)):
         buttons[x,y].drawbutton(screen)
 
+#Occurs when a position on window is clicked
 def clicked(pos):
+    #Things that occur if gid is clicked
     if pos[1]>0 and pos[1]<GRIDHEIGHT:
         for x in range(NUMOFCELLS):
             for y in range(NUMOFCELLS):
@@ -179,6 +196,7 @@ def clicked(pos):
                 if cells[x,y].number == num and not cells[x,y].highlighted and num != '':
                     cells[x,y].setHighlighted(2)
 
+    #Things that occur if s button is clicked
     for x in range(int((GRIDWIDTH/3 - BUTTONWIDTH)/2), GRIDWIDTH, int(GRIDWIDTH/3)):
         y = 0
         if buttons[x,y].rect.collidepoint(pos):
@@ -193,7 +211,7 @@ def clicked(pos):
 
 
 
-
+#Checks if a number can be changed and cheanges it
 def changeNum(n):
     for x in range(NUMOFCELLS):
         for y in range(NUMOFCELLS):
@@ -201,7 +219,7 @@ def changeNum(n):
                 cells[x,y].drawNum(n)
                 inputCheck(x, y, n)
 
-
+#Checks if a number input is correct and highlights accordingly
 def inputCheck(x, y, n):
     if correctBoard[int(y)][int(x)] == n:
         cells[x,y].correct = True
@@ -209,6 +227,7 @@ def inputCheck(x, y, n):
     else:
         print('incorrect')
 
+#Recursive backtracking algorithm
 def solveBoard(board):
     find = findSpaces(board)
     if not find:
@@ -232,7 +251,7 @@ def solveBoard(board):
     return False
 
 
-
+#Find enpty fluid spaces
 def findSpaces(board):
     for x in range(NUMOFCELLS):
         for y in range(NUMOFCELLS):
@@ -240,8 +259,9 @@ def findSpaces(board):
                 return (x,y)
     return None
 
+#Checks if a number input is valid
 def valid(board, num, x, y):
-
+    #Checks rows and columns
     for i in range(9):
         if cells[x,i].number == str(num) and y != i:
             print("invalid")
@@ -252,6 +272,7 @@ def valid(board, num, x, y):
             print("invalid")
             return False
 
+    #Checks 3x3 boxes
     box_x = x // 3
     box_y = y // 3
 
